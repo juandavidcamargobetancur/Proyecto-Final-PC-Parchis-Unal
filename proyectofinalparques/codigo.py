@@ -1,264 +1,377 @@
-# TODO addthe developer mode in jugador funtion
 #Variables de modo de Juego:
-mod=0
+mod=0 # Indica el modo de juego actual (0: sin definir, 1: Consola, 2: Consola+Graficos, 3: Solo graficos)
+# Modos disponibles:
 #1:Consola
 #2.Consola+Graficos
 #3.Graficos
-from tkinter import *
-import tkinter.messagebox
-import threading, platform
-from random import randrange
-POSICION=1
-OS = platform.system()
-imgDados = []
-arregloDados={}
-Pan = ""
-LB = ""
-BTN = ""
-desa=False
-g = open("log.txt","w")
-g.close()
-def escribir(dato):
-    f = open("log.txt","a")
-    f.write(str(dato)+"\n")
-    f.close()
+# Importa los modulos necesarios para la interfaz grafica y funcionalidades adicionales
+from tkinter import * # Importa todas las funciones de Tkinter para crear interfaces grafic
+import tkinter.messagebox # Importa cuadros de mensajes de Tkinter
+import threading, platform # Importa threading para manejo de hilos y platform para detectar el sistema operativo
+from random import randrange  # Importa randrange para generar numeros aleatorios (uso en los dados)
 
-imgFichas={}
-def obtenerDadosIngresados():
-    global caja_entrada_dados,texto_ingresado
-    texto_ingresado = caja_entrada_dados.get()
-def seleccionarOpcion():
-    global seleccion
-    seleccion=True
-def Gra():
+POSICION=1 # Variable global para rastrear la posicion de los jugadores
+
+# Detecta el sistema operativo en uso (Windows, Linux, etc.)
+OS = platform.system()
+
+# Variables para almacenar imagenes de los dados y otros elementos graficos
+imgDados = [] # Lista para imagenes de los dados
+arregloDados={} # Diccionario para asociar valores de los dados con sus imagenes
+
+# Variables globales para la ventana y elementos graficos
+Pan = "" # Almacena la ventana principal
+LB = "" # Almacena las etiquetas (labels)
+BTN = "" # Almacena los botones
+
+# Variable para activar el modo desarrollador
+desa=False # False: modo normal, True: modo desarrollador
+
+# Crea un archivo de log para registrar eventos durante el juego
+g = open("log.txt","w") # Abre (o crea) el archivo log.txt en modo escritura y lo vacia si ya existe
+g.close() # Cierra el archivo despues de vaciarlo
+
+# Funcion para escribir en el archivo de log
+def escribir(dato):
+     """
+    Registra datos en el archivo log.txt.
+
+    @param dato: Informacion a registrar en el archivo (puede ser texto o numeros).
     """
-    Starts the graphic mode
+    f = open("log.txt","a") # Abre el archivo en modo append (para agregar sin borrar lo anterior)
+    f.write(str(dato)+"\n")  # Escribe el dato convertido a texto y agrega un salto de linea
+    f.close()  # Cierra el archivo para guardar los cambios
+
+# Diccionario para almacenar las imagenes de las fichas por color
+imgFichas={}
+
+def obtenerDadosIngresados():
+        """
+    Actualiza la variable global 'texto_ingresado' con el valor ingresado en la caja de texto.
 
     @return: None
     """
-    global LB, BTN,Pan  # Label and button for the start page
-    Pan = Tk()  # Creates a new screen
+    global caja_entrada_dados,texto_ingresado # Declara las variables como globales para modificarlas
+    texto_ingresado = caja_entrada_dados.get() # Obtiene el valor ingresado en la caja de texto
+
+# Funcion para actualizar la variable 'seleccion' cuando se elige una opcion
+def seleccionarOpcion():
+     """
+    Activa la variable global 'seleccion' indicando que una opcion fue seleccionada.
+
+    @return: None
+    """
+    global seleccion   # Declara la variable como global para modificarla
+    seleccion=True # Activa la variable seleccion
+
+# Funcion para iniciar el modo grafico del juego
+def Gra():
+    """
+    Inicia el modo grafico del juego.
+
+    @return: None
+    """
+    global LB, BTN,Pan  # Declara las variables como globales para modificarlas
+    Pan = Tk()  # Crea una nueva ventana
+    # Carga las imagenes de los dados
     d1=PhotoImage(file="d1.gif")
     d2=PhotoImage(file="d2.gif")
     d3=PhotoImage(file="d3.gif")
     d4=PhotoImage(file="d4.gif")
     d5=PhotoImage(file="d5.gif")
     d6=PhotoImage(file="d6.gif")
+    # Carga las imagenes de las fichas por color
     fRo=PhotoImage(file="fRo.gif")
     fVe=PhotoImage(file="fVe.gif")
     fAm=PhotoImage(file="fAm.gif")
     fAz=PhotoImage(file="fAz.gif")
+    # Declara los diccionarios como globales para modificarlos
     global imgFichas, arregloDados
+    # Asocia cada color con su respectiva imagen
     imgFichas["rojo"]=fRo
     imgFichas["verde"]=fVe
     imgFichas["amarillo"]=fAm
     imgFichas["azul"]=fAz
+    # Asocia cada valor del dado con su respectiva imagen
     arregloDados[1] = d1
     arregloDados[2] = d2
     arregloDados[3] = d3
     arregloDados[4] = d4
     arregloDados[5] = d5
     arregloDados[6] = d6
-    Pan.configure(bg = "white")
-    Pan.geometry("700x600+50+50")
-    fondo = PhotoImage(file = "fondo.gif")
+    
+    # Configura la ventana principal
+    Pan.configure(bg = "white") # Establece el color de fondo en blanco
+    Pan.geometry("700x600+50+50") # Define el tamano y la posicion de la ventana
+    # Carga y muestra la imagen de fondo
+    fondo = PhotoImage(file = "f.gif")
     LF = Label(Pan, image = fondo)
-    LF.img = fondo
-    LF.pack()
+    LF.img = fondo # Mantiene una referencia a la imagen para evitar que se elimine
+    LF.pack() # Agrega la imagen a la ventana
+
+    # Crea un label con el titulo del juego
     LB = Label(Pan, text = "BIENVENIDOS A NUESTRO JUEGO", font = ("Times New Roman", 30))
-    LB.place(x = 10, y = 10)
+    LB.place(x = 10, y = 10) # Establece la posicion del titulo
+    # Crea el boton INICIAR y lo asocia con la funcion IniciarJuego
     if (OS == "Windows"):
+         # Si el sistema operativo es Windows, usa hilos para evitar que la interfaz se congele
         BTN = Button(Pan, text = "INICIAR", command = lambda: threading.Thread(target=IniciarJuego).start(),
                      font=("Algerian", 40))
     else:
+        # En otros sistemas, inicia el juego directamente
         BTN = Button(Pan, text="INICIAR", command=IniciarJuego, font=("Algerian", 40))
     BTN.place(x=100, y=100)
+    # Mantiene la ventana abierta hasta que se cierre manualmente
     Pan.mainloop()
 
-
+# Definicion de la clase jugador para representar a cada participante del juego
 class jugador:
 
     def __init__(self, nombre, color, fichas, GanoJugador=False, UltimaFicha=None):
         """
+        Inicializa un nuevo jugador con su nombre, color, fichas y estado inicial.
 
-        @param nombre:  player name
-        @param color:  player color
-        @param fichas:  List of elements of objects 'ficha'
+        @param nombre: Nombre del jugador
+        @param color: Color asignado al jugador (rojo, verde, amarillo, azul)
+        @param fichas: Lista de objetos 'ficha' asociados al jugador
+        @param GanoJugador: Indica si el jugador ha ganado (por defecto es False)
+        @param UltimaFicha: Ultima ficha movida por el jugador (por defecto es None)
         @return: None
         """
-        self.nombre = nombre
-        self.color = color
-        self.fichas = fichas
-        self.UltimaFicha = UltimaFicha
-        self.GanoJugador = False
-        self.Posicion=0
+        self.nombre = nombre # Almacena el nombre del jugador
+        self.color = color # Almacena el color del jugador
+        self.fichas = fichas # Almacena la lista de fichas del jugador
+        self.UltimaFicha = UltimaFicha # Almacena la ultima ficha movida (inicialmente None)
+        self.GanoJugador = False # Indica si el jugador ha ganado (inicialmente False)
+        self.Posicion=0  # Almacena la posicion final del jugador al terminar la partida
 
+    # Metodo para definir la ultima ficha movida por el jugador
     def DefinirUltimaFicha(self, jugadorActual, Ficha):  # Cada jugador tendra una ultima ficha
+          """
+        Establece cual fue la ultima ficha movida por el jugador.
+    
+        @param jugadorActual: Objeto de la clase 'jugador' que esta moviendo la ficha
+        @param Ficha: Objeto de la clase 'ficha' que representa la ultima ficha movida
+        @return: None
+        """
         self.UltimaFicha = Ficha # Busca indice de la lista de fichas
 
+# Metodo para lanzar un dado y determinar quien empieza el juego
     def TirarUnDado(self,desa):  # Para saber quien empieza
-        global mod,texto_ingresado, caja_entrada_dados
         """
-        @param desarrollador, if the user enter the die value this param is true
-        Returns a random number, which represents the die thrown
-        @return: Random number between 1 and 6
+        Lanza un dado y devuelve un numero aleatorio entre 1 y 6. 
+        Si el modo desarrollador esta activado, permite ingresar manualmente el valor del dado.
+    
+        @param desa: Indica si el modo desarrollador esta activado (True o False)
+        @return: Numero aleatorio entre 1 y 6 o el valor ingresado manualmente
         """
-        x=0
+        global mod,texto_ingresado, caja_entrada_dados # Declara variables globales para usarlas dentro del metodo    
+        x=0 # Inicializa la variable para el valor del dado
+
+        # Si el modo desarrollador no esta activado
         if not desa:
-            if mod<3:
+            if mod<3: # Modo consola o consola+graficos
                 print("%s presione enter para tirar un dado:" % self.nombre)
-                input()
-                escribir("\n")
-                x = randrange(1, 7)
-                escribir(x)
+                input() # Espera a que el jugador presione Enter
+                escribir("\n") # Registra en el log
+                x = randrange(1, 7) # Genera un numero aleatorio entre 1 y 6
+                escribir(x) # Registra el resultado en el log
                 print("Su resultado es %d\n" % x)
-            else:
+            else:  # Modo grafico
                 caja_entrada_dados.config(state="normal")
                 caja_entrada_dados.delete(0,END)
                 caja_entrada_dados.insert(0,"%s presione continuar"%self.nombre)
                 caja_entrada_dados.config(state="readonly")
                 inp=""
                 texto_ingresado=""
-                while inp=="":
+                while inp=="": # Espera hasta que se ingrese un valor
                     inp=texto_ingresado
-                x=randrange(1,7)
-        else:
-            x = 0
-            if mod==3:
+                x=randrange(1,7) # Genera un numero aleatorio entre 1 y 6
+         # Si el modo desarrollador esta activado
+        else: 
+            x = 0 # Inicializa el valor del dado
+            if mod==3:  # Si esta en modo grafico
                 caja_entrada_dados.config(state="normal")
                 caja_entrada_dados.delete(0,END)
                 caja_entrada_dados.insert(0,"Digite el valor del dado de "+self.nombre+":\n")
-            texto_ingresado="7"
-            while x <= 0 or x > 6:
+            texto_ingresado="7"   # Asigna un valor inicial para evitar bucles infinitos
+            while x <= 0 or x > 6: # Valida que el valor ingresado este entre 1 y 6
                 if mod<3:
                     x = input("Digite el valor del dado de "+self.nombre+":\n")
                 else:
                     x=texto_ingresado
-                escribir(x)
+                escribir(x) # Registra el valor en el log
                 try:
-                    x = int(x)
+                    x = int(x) # Convierte el valor ingresado a entero
                 except:
-                    x = 0
-        if mod>1:
-            global L_DADOS1,L_DADOS2
-            L_DADOS1.config(image = arregloDados[x],bg = "green")
-            L_DADOS1.img = arregloDados[x] 
-            L_DADOS2.config(image=None,bg="white")
-        return x
-    def TirarDosDados(self,desa):
-        """
-        @param desarrollador, if the user enter the die value this param is true
-        Returns a random number, which represents the die thrown
-        @return: Random number between 1 and 6
+                    x = 0 # Si ocurre un error en la conversion, reinicia el valor a 0
 
+        # Si esta en modo grafico o consola+graficos
+        if mod>1:
+            global L_DADOS1,L_DADOS2 # Usa las variables globales para mostrar los resultados graficos
+            L_DADOS1.config(image = arregloDados[x],bg = "green") # Muestra la imagen correspondiente al valor del dado
+            L_DADOS1.img = arregloDados[x]  # Guarda una referencia a la imagen para evitar que se elimine
+            L_DADOS2.config(image=None,bg="white") # Limpia la imagen del segundo dado
+        return x  # Devuelve el resultado del dado
+
+    # Metodo para lanzar dos dados y obtener sus resultados
+    def TirarDosDados(self,desa):
+            """
+        Lanza dos dados y devuelve dos numeros aleatorios entre 1 y 6. 
+        Si el modo desarrollador esta activado, permite ingresar manualmente los valores de los dados.
+    
+        @param desa: Indica si el modo desarrollador esta activado (True o False)
+        @return: Una tupla con dos numeros (x, y) entre 1 y 6 o los valores ingresados manualmente
         """
-        global mod,texto_ingresado,caja_entrada_dados
-        x = 0
-        y = 0
+        global mod,texto_ingresado,caja_entrada_dados  # Declara variables globales para usarlas dentro del metodo
+        x = 0  # Inicializa el valor del primer dado
+        y = 0 # Inicializa el valor del segundo dado
+     # Si el modo desarrollador no esta activado   
         if not desa:
-            if mod<3:
+            if mod<3: # Modo consola o consola+graficos
                 print("%s presione enter para tirar dos dados:" % self.nombre)
-                input()
-                escribir("\n")
-                x = randrange(1, 7)
-                y = randrange(1, 7)
-                escribir([x,y])
+                input() # Espera a que el jugador presione Enter
+                escribir("\n") # Registra en el log
+                x = randrange(1, 7) # Genera un numero aleatorio entre 1 y 6 para el primer dado
+                y = randrange(1, 7) # Genera un numero aleatorio entre 1 y 6 para el segundo dado
+                escribir([x,y]) # Registra los resultados en el log
                 print("Su resultado es %d %d\n" % (x, y))
-            else:
+            else: # Modo grafico
                 caja_entrada_dados.config(state="normal")
                 caja_entrada_dados.delete(0,END)
                 caja_entrada_dados.insert(0,"%s presione continuar"%self.nombre)
                 caja_entrada_dados.config(state="readonly")
                 inp=""
                 texto_ingresado=""
-                while inp=="":
+                while inp=="": # Espera hasta que se ingrese un valor
                     inp=texto_ingresado
+                 # Genera numeros aleatorios entre 1 y 6 para ambos dados
                 x = randrange(1, 7)
                 y = randrange(1, 7)
+        # Si el modo desarrollador esta activado
         else:
-            if mod==3:
+            if mod==3: # Si esta en modo grafico
                 caja_entrada_dados.config(state="normal")
                 caja_entrada_dados.delete(0,END)
                 caja_entrada_dados.insert(0,"Digite el valor de los dados de "+self.nombre+":\n")
-            texto_ingresado="7"
-            lis = []
+            texto_ingresado="7" # Asigna un valor inicial para evitar bucles infinitos
+            lis = [] # Lista para almacenar los valores ingresados
+             # Valida que los valores ingresados esten entre 1 y 6
             while x <= 0 or x > 6 or y <= 0 or y > 6:
-                if mod<3:
+                if mod<3:  # Modo consola o consola+graficos
                     print("%s digite el valor de los dados separados por un espacio" % self.nombre)
-                    lis = input().split()
-                else:
+                    lis = input().split() # Lee los valores ingresados
+                else:  # Modo grafico
                     lis=texto_ingresado.split()
-                escribir(lis)
+                escribir(lis)  # Registra los valores ingresados en el log
                 try:
+                     # Convierte los valores ingresados a enteros y los asigna a x e y
                     x, y = tuple(map(int, lis))
                 except:
+                     # Si ocurre un error en la conversion, reinicia los valores a 0
                     x = 0
                     y = 0
+
+        # Si esta en modo grafico o consola+graficos
         if mod>1:
-            global L_DADOS1 , L_DADOS2 
+            global L_DADOS1 , L_DADOS2  # Usa las variables globales para mostrar los resultados graficos
+            # Muestra la imagen correspondiente al valor de cada dado
             L_DADOS1.config(image = arregloDados[x],bg="green")
-            L_DADOS1.img = arregloDados[x] 
+            L_DADOS1.img = arregloDados[x]   # Guarda una referencia a la imagen para evitar que se elimine
             L_DADOS2.config(image = arregloDados[y],bg="green")
-            L_DADOS2.img = arregloDados[y]
-        return (x, y)
+            L_DADOS2.img = arregloDados[y]  # Guarda una referencia a la imagen para evitar que se elimine
+        return (x, y) # Devuelve los resultados de los dos dados como una tupla
 
-
+# Definicion de la clase espacio para representar cada casilla del tablero
 class espacio(object):
     
-    """
-    Represents each space in the board. It considers all the spaces in the board, including the special spaces (exits, safe spaces, arrival spaces)
-    """
+     """
+     Representa cada espacio en el tablero, incluyendo las casillas normales, especiales, de salida, seguras y de llegada.
+     """
 
+     # Metodo constructor para inicializar los atributos de cada casilla
     def __init__(self, numeroEspacio, etiqueta,x,y,tipoEspacio="normal", colorCasillaEspecial="ninguno",orientacion="Ninguna"):
-        """
-        @param nombre:  Int between 1 and 101 representing one space in the board
-        @param tipo:  Type of space (String) [inicio (requires color),llegada,especial    (requires color),seguro,salida]
-        @param color:  (String)Represents the arrival spaces for each player
+      """
+        Inicializa un nuevo espacio en el tablero con sus propiedades.
+
+        @param numeroEspacio: Numero del espacio (entre 1 y 101)
+        @param etiqueta: Widget de Tkinter asociado a la casilla (para modo grafico)
+        @param x: Coordenada x de la casilla en el tablero grafico
+        @param y: Coordenada y de la casilla en el tablero grafico
+        @param tipoEspacio: Tipo de casilla (por defecto "normal"). Puede ser:
+                            - "inicio": Casillas de inicio para cada jugador
+                            - "llegada": Casilla final
+                            - "especial": Casillas especiales de cada color
+                            - "seguro": Casillas seguras donde no se puede capturar fichas
+                            - "salida": Casillas de salida de la carcel
+        @param colorCasillaEspecial: Color de la casilla especial (si aplica, por defecto "ninguno")
+        @param orientacion: Orientacion de la casilla ("horizontal", "vertical" o "Ninguna")
         @return: None
         """
-        global mod
-        self.colorCasillaEspecial = colorCasillaEspecial
-        self.tipoEspacio = tipoEspacio
-        self.numeroEspacio = numeroEspacio
-        self.etiqueta = etiqueta
+        global mod # Usa la variable global mod para verificar el modo de juego
+        self.colorCasillaEspecial = colorCasillaEspecial  # Almacena el color de la casilla especial
+        self.tipoEspacio = tipoEspacio # Almacena el tipo de casilla
+        self.numeroEspacio = numeroEspacio  # Numero identificador de la casilla
+        self.etiqueta = etiqueta # Widget de Tkinter asociado a la casilla (modo grafico)
+
+        # Si el modo grafico esta activado, asigna eventos de mouse para mostrar informacion
         if mod>1:
-            self.etiqueta.bind("<Enter>",self.Entra)
-            self.etiqueta.bind("<Leave>",self.Sale)
-        self.orientacion = orientacion
-        self.NoFichas = 0
-        self.PosFicha = ""
-        self.x = x
-        self.y = y
+            self.etiqueta.bind("<Enter>",self.Entra) # Evento al pasar el mouse sobre la casilla
+            self.etiqueta.bind("<Leave>",self.Sale) # Evento al quitar el mouse de la casilla
+            
+        self.orientacion = orientacion # Almacena la orientacion de la casilla
+        self.NoFichas = 0 # Contador de fichas presentes en la casilla
+        self.PosFicha = ""  # Posicion de la ficha en la casilla (A o B para superpuestas)
+        self.x = x # Coordenada x en el tablero grafico
+        self.y = y # Coordenada y en el tablero grafico
+
+    # Metodo para manejar el evento cuando el mouse entra en la casilla (modo grafico)
     def Entra(self,event):
-        global L_NOMBRES
-        L_NOMBRES.config(text = str(self.numeroEspacio))
+        """
+        Muestra el numero de la casilla cuando el mouse pasa sobre ella (modo grafico).
+        @param event: Evento de Tkinter
+        """
+        global L_NOMBRES # Usa la variable global L_NOMBRES para actualizar el texto mostrado
+        L_NOMBRES.config(text = str(self.numeroEspacio))  # Muestra el numero de la casilla
+
+    # Metodo para manejar el evento cuando el mouse sale de la casilla (modo grafico)
     def Sale(self,event):
-        global L_NOMBRES
-        L_NOMBRES.config(text = "NOMBRES")
+         """
+        Restablece el texto cuando el mouse sale de la casilla (modo grafico).
+        @param event: Evento de Tkinter
+        """
+        global L_NOMBRES # Usa la variable global L_NOMBRES para actualizar el texto mostrado
+        L_NOMBRES.config(text = "NOMBRES") # Restablece el texto a "NOMBRES"
+
+# Definicion de la clase ficha para representar cada ficha del jugador
 class ficha:  # Declara la clase ficha
     """
-    Represents each player token
+    Representa cada ficha de un jugador en el tablero.
     """
-
+     # Metodo constructor para inicializar los atributos de cada ficha
     def __init__(self, nombreFicha, colorFicha, espacioActual,estadoJuego = "inicio"):
         """
-        @param nombreFicha: (String)Each token has a unique value, with is composed by the color and a unique number i.e('rojo1', 'rojo2', ...)
-        @param colorFicha: (String)The color of the token
-        @param espacioActual: Object of class 'espacio'
-        @param estadoJuego: (String) The current space of the token
+        Inicializa una nueva ficha con su nombre, color, posicion inicial y estado.
 
+        @param nombreFicha: Nombre unico de la ficha (por ejemplo: 'rojo1', 'verde2')
+        @param colorFicha: Color de la ficha (rojo, verde, amarillo, azul)
+        @param espacioActual: Objeto de la clase 'espacio' que representa la posicion actual de la ficha
+        @param estadoJuego: Estado actual de la ficha ('inicio', 'activo', etc.)
         @return: None
         """
-        global mod
-        self.colorFicha = colorFicha
-        self.espacioActual = espacioActual
-        self.estadoJuego = estadoJuego
-        self.nombreFicha = nombreFicha
-        self.espacioActual = espacioActual
-        etiqueta=""
+        global mod # Usa la variable global mod para verificar el modo de juego
+        self.colorFicha = colorFicha # Almacena el color de la ficha
+        self.espacioActual = espacioActual  # Almacena la posicion actual de la ficha
+        self.estadoJuego = estadoJuego  # Almacena el estado de la ficha (inicio, activo, etc.)
+        self.nombreFicha = nombreFicha  # Almacena el nombre unico de la ficha
+        self.espacioActual = espacioActual # Almacena la posicion actual de la ficha (funciona reprtida)
+        etiqueta=""  # Variable para el widget grafico de la ficha
+
+        # Si el modo grafico esta activado
         if mod>1:
-            etiqueta = Label(Pan,image = imgFichas[colorFicha])
-            etiqueta.img=imgFichas[colorFicha]
+            etiqueta = Label(Pan,image = imgFichas[colorFicha]) # Crea un label para mostrar la imagen de la ficha
+            etiqueta.img=imgFichas[colorFicha]  # Guarda la referencia a la imagen para evitar que se elimine
+            # Coloca la ficha en la posicion correspondiente segun la cantidad de fichas en la casilla
             if self.espacioActual.NoFichas == 0:
                 etiqueta.place(x = self.espacioActual.x + 40,y = self.espacioActual.y + 40,width = 14,height = 14)
                 self.xI = self.espacioActual.x + 40
@@ -275,41 +388,61 @@ class ficha:  # Declara la clase ficha
                 etiqueta.place(x=self.espacioActual.x+80,y=self.espacioActual.y+80,width=14,height=14)
                 self.xI = self.espacioActual.x + 80
                 self.yI = self.espacioActual.y + 80
-        self.espacioActual.NoFichas+=1
-        self.etiqueta = etiqueta
+                
+        self.espacioActual.NoFichas+=1 # Incrementa el contador de fichas en la casilla
+        self.etiqueta = etiqueta  # Asocia la etiqueta grafica a la ficha
+
+         # Asigna eventos para mostrar el nombre de la ficha al pasar el mouse (modo grafico)
         if mod>1:
             self.etiqueta.bind("<Enter>",self.Entra)
             self.etiqueta.bind("<Leave>",self.Sale)
-        self.PosFicha = ""
+        self.PosFicha = "" # Almacena la posicion relativa de la ficha (A o B para fichas superpuestas)
+
+    # Metodo para mostrar el nombre de la ficha cuando el mouse pasa sobre ella
     def Entra(self,event):
         global L_NOMBRES
         L_NOMBRES.config(text=self.nombreFicha)
+
+    # Metodo para restablecer el texto cuando el mouse sale de la ficha
     def Sale(self,event):
         global L_NOMBRES
         L_NOMBRES.config(text="NOMBRES")
+
+    # Metodo para mostrar las propiedades actuales de la ficha
     def imprimirPropiedades(self):
         """
-        Returns the current state of the token
-        @return: None
+        Devuelve un string con el estado actual de la ficha.
+        @return: String con el nombre, color, posicion y estado de la ficha.
         """
         return "Ficha %s: color= %s espacio=%s estado=%s" % (
             self.nombreFicha, self.colorFicha, self.espacioActual.numeroEspacio, self.estadoJuego)
+
+    # Metodo para eliminar la ficha del tablero grafico
     def eliminarFicha(self):
         self.etiqueta.destroy()
+    
+    # Metodo para actualizar la posicion de la ficha
     def cambiarPosicion(self, NuevoEspacio):
         """
-        Actualiza la posicion
+        Mueve la ficha a una nueva posicion en el tablero.
+
+        @param NuevoEspacio: Objeto de la clase 'espacio' representando la nueva posicion.
         """
         global mod
-        self.espacioActual.NoFichas-=1
+        self.espacioActual.NoFichas-=1  # Disminuye el contador de fichas en la casilla actual
+        # Actualiza la posicion relativa (A o B) segun la cantidad de fichas en la casilla
         if self.espacioActual.NoFichas==1 and self.PosFicha=="A":
           self.espacioActual.PosFicha="B"
         elif self.espacioActual.NoFichas==1 and self.PosFicha=="B":
           self.espacioActual.PosFicha="A"
-        self.espacioActual = NuevoEspacio
+            
+        self.espacioActual = NuevoEspacio   # Actualiza la posicion de la ficha
+        # Si la nueva casilla es de inicio, coloca la ficha en la posicion inicial
         if self.espacioActual.tipoEspacio=="inicio":
             if mod>1:
                 self.etiqueta.place(x=self.xI,y=self.yI)
+
+        # Coloca la ficha en la nueva posicion segun la orientacion de la casilla y la cantidad de fichas
         elif self.espacioActual.NoFichas==0 and self.espacioActual.orientacion=="vertical":
             if mod>1:
                 self.etiqueta.place(x=self.espacioActual.x,y=self.espacioActual.y+7)
@@ -320,6 +453,8 @@ class ficha:  # Declara la clase ficha
                 self.etiqueta.place(x=self.espacioActual.x+7,y=self.espacioActual.y)
             self.espacioActual.PosFicha="A"
             self.PosFicha="A"
+
+         # Maneja posiciones cuando hay mas de una ficha en la misma casilla
         elif self.espacioActual.NoFichas==1:
             if self.espacioActual.orientacion=="vertical" and self.espacioActual.PosFicha=="B":
               if mod>1:
@@ -337,29 +472,33 @@ class ficha:  # Declara la clase ficha
               if mod>1:
                   self.etiqueta.place(x=self.espacioActual.x+33,y=self.espacioActual.y)
               self.PosFicha="B"
-        NuevoEspacio.NoFichas+=1
+        NuevoEspacio.NoFichas+=1# Incrementa el contador de fichas en la nueva casilla
+
+   # Metodo para obtener el nombre de la ficha
     def num(self):
         return self.nombreFicha
 
-
+# Funcion para crear el tablero del juego
 def CrearTablero():
     """
-    Creates the game board, which is composed by
-    68 common spaces,
-    7 spaces for each color (28 in total), 4 starting spaces and one arrival space
+    Crea el tablero del juego, compuesto por:
+    - 68 casillas comunes
+    - 7 casillas para cada color (28 en total)
+    - 4 casillas de inicio y una casilla de llegada
 
-    @return: List of objects of class 'espacio'
+    @return: Lista de objetos de la clase 'espacio'
     """
-    global mod
-    tablero = []
+    global mod # Usa la variable global mod para verificar el modo de juego
+    tablero = []   # Lista para almacenar las casillas
+
+     # Crea las 68 casillas comunes
     for x in range(68):
-        #5 22 39 56 (r v a z)
-        labelF = ""
-        labelI = ""
-        orientacion = ""
-        #if x+1 in ([x1 for x1 in range(1,8)]+[x2 for x2 in range(61,68)]+[x3 for x3 in range(27,34)]+[x4 for x4 in range(35,42)]):
-        xF=0
-        yF=0
+        labelF = "" # Etiqueta para la casilla (fondo)
+        labelI = "" # Etiqueta para la casilla (interior)
+        orientacion = "" # Orientacion de la casilla (horizontal o vertical)
+        xF=0 # Coordenada x de la casilla
+        yF=0 # Coordenada y de la casilla
+        # Si el modo grafico esta activado, crea etiquetas y posiciones para las casillas
         if mod>1:
             if x+1 in [y1 for y1 in range(1,9)]:
                     orientacion = "vertical"
@@ -367,7 +506,7 @@ def CrearTablero():
                     if x + 1 == 5:
                         labelF=Label(Pan,bg="black",borderwidth=0)
                         labelF.place(x=z*18+250,y=252,width=18,height=54)
-                        labelI=Label(Pan,bg="#ED0D0D",borderwidth=0)
+                        labelI=Label(Pan,bg="#ED0D0D",borderwidth=0) 
                         labelI.place(x=z*18+252,y=254,width=14,height=50)
                     else:
                         labelF=Label(Pan,bg="black",borderwidth=0)
@@ -581,7 +720,7 @@ def CrearTablero():
         tablero.append(NuevaCasilla)
     lab=""
     if mod>1:
-        imagen=PhotoImage(file="trofeo.gif")
+        imagen=PhotoImage(file="corona.gif")
         lab=Label(Pan,bg="black")
         lab.place(x=394,y=144,width=162,height=162)
         lab=Label(Pan,image=imagen)
@@ -592,24 +731,12 @@ def CrearTablero():
 
 
 def CrearJugadoresYFichas(tablero, numeroJugadores, nombres):
-    """
-    Creates the tokens of each player in the board and also initializes each object of class 'player'
 
-    @param tablero: Object of class 'tablero'
-    @param numeroJugadores: (int) The total number of players
-    @param nombres: (tuple of strings) containing the name of each player
-
-    """
     jugadores = []
     for x in range(numeroJugadores):  # Itera en el número de jugadores que hayan ingresado
         fichas = []
         if x == 0:  # Si x es 0, sera el primer jugador, y por ende fichas rojas
-            """
-            68-> Start position for red.
-            69-> Start position for green.
-            70-> Start position for yellow.
-            71-> Start position for blue.
-            """
+    
             for z in range(4):  # Crea las 4 fichas rojas
                 NuevaFicha = ficha("rojo%d" % (z + 1), "rojo",
                                    tablero[68])  # Le asigna el número de ficha con su posición
@@ -708,7 +835,7 @@ def pedirDatos():
     else:
         print("Presione enter para continuar (ó digite la contraseña para modo desarrollador):")
         x = input()
-    if x == "proyectofinal":  #:>   
+    if x == "proyectofinal": #contraseña modo desarrollador
         global desa
         desa = True
     escribir("\n")
@@ -721,11 +848,7 @@ def pedirDatos():
 
 
 def ObtenerMayor(listaJugadores):
-    """
-    Gets the max element of a 'jugador' list
 
-    @param listaJugadores: list of elements of class 'jugador'
-    """
     arreglo = []
     for i in range(len(listaJugadores)):
         arreglo.append(listaJugadores[i].valor)
@@ -733,17 +856,7 @@ def ObtenerMayor(listaJugadores):
 
 
 def OrdenDeJuego(ListaJugadores, modoDesarrollador=False):
-    """
-    Returns the index of the first player to start.
-    Example:
-    Two players have joined:
-        First player: 3
-        Second player: 6
-        Second player starts the game, and the others players play in the same order of the list of players
 
-    @param ListaJugadores: List of objects of class 'jugador'
-    @param modoDesarrollador: For evaluation purposes only
-    """
     global desa,mod
     aux = ListaJugadores[:]
     while (len(aux) != 1):
@@ -764,11 +877,8 @@ def OrdenDeJuego(ListaJugadores, modoDesarrollador=False):
 
 
 def GameOver(Jugadores):
-    """
-    @param Jugadores: List ob object of class 'Jugador'
 
-    """
-    numberWonPlayers = 0  # Counts the number of players that have already won
+    numberWonPlayers = 0 
     for jugadorActual in Jugadores:
         if jugadorActual.GanoJugador:
             numberWonPlayers += 1
@@ -782,13 +892,7 @@ def GameOver(Jugadores):
 
 
 def posiblesMovimientos(JugadorActual, resultadoDado, ListaJugadores):
-    """
-    Returns a list of all the possible movements of a player given a die result
 
-    @param JugadorActual: Object of class 'Jugador'
-    @param resultadoDado: The number of spaces to move forward
-    @param ListaJugadores: List of Objects of class 'Jugador'
-    """
     listaPosiblesMovimientos = []
     # Esto se va a cambiar de funcion
     listaCasillasCarcel = [69, 70, 71, 72]
@@ -883,7 +987,7 @@ def posiblesMovimientos(JugadorActual, resultadoDado, ListaJugadores):
 
         if not bloqueo:
             if CasillaEspecial == 101 or posicionFinal == numeroPrimeraEspecial + 7:
-                textoRespuesta = '{} trofeo'.format(nombreFicha)
+                textoRespuesta = '{} corona'.format(nombreFicha)
                 listaPosiblesMovimientos.append((textoRespuesta, fichaActual))
 
             elif posicionFinal <= 68 and posicionFinal in tuplaCasillasUnaFicha and CasillaEspecial==0:
@@ -985,7 +1089,7 @@ def realizarMovimiento(movimientoRealizar, tablero, jugadorActual,Jugadores): # 
     elif 'mueve' in descripcionMovimiento:
         posicionFinal = int(descripcionMovimiento.split()[-1])
         FichaMover.cambiarPosicion(tablero[posicionFinal - 1])  # Cambia posicion de la ficha
-    elif 'trofeo' in descripcionMovimiento:
+    elif 'corona' in descripcionMovimiento:
         if mod>1:
             FichaMover.eliminarFicha()
         jugadorActual.fichas.remove(FichaMover)
@@ -995,7 +1099,7 @@ def realizarMovimiento(movimientoRealizar, tablero, jugadorActual,Jugadores): # 
           POSICION+=1
           jugadorActual.GanoJugador = True
         if mod>1:
-            tkinter.messagebox.showinfo("trofeo",FichaMover.nombreFicha+" trofeo.")
+            tkinter.messagebox.showinfo("Corona",FichaMover.nombreFicha+" corona.")
         listaMovi=posiblesMovimientos(jugadorActual,10,Jugadores)
         if listaMovi and len(listaMovi) == 1:
             realizarMovimiento(listaMovi[0],tablero,jugadorActual,Jugadores)
@@ -1025,7 +1129,10 @@ def opciones(Lista, JugadorActual):
         drop = OptionMenu(Pan,clicked,clicked.get(),*options)
         drop.place(x=0,y=450,width=700,height=50)
         boton_entrada_dados.config(command=seleccionarOpcion)
-        Pan.wait_variable(clicked)
+        while(not seleccion):
+            if clicked.get()=="Seleccione una opción":
+                seleccion=False
+            pass
         eleccion=options.index(clicked.get())+1
         boton_entrada_dados.config(command=obtenerDadosIngresados)
         drop.destroy()
@@ -1058,9 +1165,7 @@ def FuncDados(etiqueta,accion):
         dadoSeleccionado=2
     
 def IniciarJuego():
-    """
-    "main" function, its executed from the _main_ function of python
-    """
+
     global desa,mod
     if mod>1:
         global LB,BTN
@@ -1204,7 +1309,7 @@ def IniciarJuego():
       print(x.nombre+" terminó en posición: %d"%x.Posicion)
 ele=0
 while(ele<=0 or ele>3):
-  print("BiEnVeNiDoS a NuEsTrO jUeGo:\nSeleccione una de las siguientes:\n1.Modo Consola\n2.Modo Consola+Graficos\n3.Modo Graficos\n")
+  print("Bienvenidos a nuestro Juego:\nSeleccione una de las siguientes:\n1.Modo Consola\n2.Modo Consola+Graficos\n3.Modo Graficos\n")
   ele=input()
   try:
     ele=int(ele)
@@ -1218,11 +1323,3 @@ if mod>1:
       Gra()
 else:
   IniciarJuego()
-#IniciarJuego()
-#  Like si ves esto
-#  Like ;)
-#if (z == 0): color = "#ED0D0D"
-#if (z == 1): color = "#04B112"
-#if (z == 2): color = "#ECC811"
-#if (z == 3): color = "#2926DA"
-#pasa
